@@ -62,14 +62,9 @@ jobs:
     - name: Build with Buildozer
       run: |
         cd mobile
-        # Use the spec file we already created
-        # We need to ensure protocol.py is in the right place
         cp ../protocol.py .
-        buildozer android debug
-      env:
-        # Avoid interactive prompts
-        BUILDOZER_ALLOW_ORG_ZAKARIA: 1
-        BUILDOZER_WARN_ON_ROOT: 0
+        # Use --verbose to see full log
+        buildozer -v android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
