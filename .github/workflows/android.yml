@@ -63,8 +63,11 @@ jobs:
       run: |
         cd mobile
         cp ../protocol.py .
-        # Use --verbose to see full log
+        # Crea il file per le licenze e avvia la build
+        mkdir -p ~/.android && touch ~/.android/repositories.cfg
         buildozer -v android debug
+      env:
+        BUILDOZER_ACCEPT_SDK_LICENSE: 1
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
