@@ -1,0 +1,6 @@
+venv/
+.buildozer/
+.buildozer/
+__pycache__/
+uploads/
+*.spec
