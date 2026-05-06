@@ -1,38 +1,18 @@
-name: Build Android APK
+- name: Setup Android SDK cmdline-tools
+  run: |
+    mkdir -p $ANDROID_HOME/cmdline-tools
+    mkdir -p $ANDROID_HOME/tools/bin
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+    cd $ANDROID_HOME/cmdline-tools
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
+    unzip tools.zip
+    rm tools.zip
 
-    env:
-      ANDROID_HOME: /home/runner/.buildozer/android/platform/android-sdk
+    mv cmdline-tools latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y python3-pip unzip openjdk-17-jdk wget
-          pip install --upgrade pip
-          pip install buildozer cython
-
-      - name: Setup Android SDK cmdline-tools (FIX ERRORE)
-        run: |
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          cd $ANDROID_HOME/cmdline-tools
-
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
-          unzip tools.zip
-          rm tools.zip
-
-          mv cmdline-tools latest
+    # Compatibilità Buildozer/Python-for-Android
+    ln -s $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
 
       - name: Accept licenses
         run: |
