@@ -12,8 +12,16 @@ class CrossLinkProtocol:
     
     def __init__(self, upload_dir="uploads"):
         self.upload_dir = Path(upload_dir)
-        self.upload_dir.mkdir(exist_ok=True)
-        self.device_name = socket.gethostname()
+        try:
+            self.upload_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(f"Directory creation failed: {e}")
+            
+        try:
+            self.device_name = socket.gethostname()
+        except:
+            self.device_name = "Android-Device"
+            
         self.discovered_devices = {} # {ip: name}
         self.is_running = True
         self.on_file_received = None # Callback(filename)
@@ -38,7 +46,7 @@ class CrossLinkProtocol:
 
     def _udp_broadcaster(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.setsockopt(sock.SOL_SOCKET, socket.SO_BROADCAST, 1)
         while self.is_running:
             message = json.dumps({"type": "discovery", "name": self.device_name, "ip": self.get_local_ip()}).encode()
             sock.sendto(message, ('<broadcast>', self.UDP_PORT))
