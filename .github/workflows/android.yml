@@ -79,6 +79,8 @@ jobs:
           cp ../protocol.py .
           # In caso di problemi con i pacchetti su Ubuntu 24.04, forziamo buildozer a usare i propri strumenti
           buildozer -v android debug
+        env:
+          BUILDOZER_ACCEPT_SDK_LICENSE: 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
