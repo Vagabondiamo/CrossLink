@@ -50,7 +50,7 @@ jobs:
             libdb-dev \
             libreadline-dev \
             libexpat1-dev \
-            libmpdec3 \
+            libmpdec-dev \
             ccache
 
       - name: Install Buildozer and Cython
