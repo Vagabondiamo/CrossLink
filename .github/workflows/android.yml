@@ -1,18 +1,86 @@
-- name: Setup Android SDK cmdline-tools
-  run: |
-    mkdir -p $ANDROID_HOME/cmdline-tools
-    mkdir -p $ANDROID_HOME/tools/bin
+name: Android CI
 
-    cd $ANDROID_HOME/cmdline-tools
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-    wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
-    unzip tools.zip
-    rm tools.zip
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    mv cmdline-tools latest
+    steps:
+      - uses: actions/checkout@v4
 
-    # Compatibilità Buildozer/Python-for-Android
-    ln -s $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libffi-dev \
+            libssl-dev \
+            python3-dev \
+            ccache \
+            libncurses5 \
+            libncurses5-dev \
+            libncursesw5 \
+            zlib1g-dev \
+            pkg-config \
+            libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-bad \
+            gstreamer1.0-plugins-ugly \
+            gstreamer1.0-libav \
+            gstreamer1.0-doc \
+            gstreamer1.0-tools \
+            gstreamer1.0-x \
+            gstreamer1.0-alsa \
+            gstreamer1.0-gl \
+            gstreamer1.0-gtk3 \
+            gstreamer1.0-qt5 \
+            gstreamer1.0-pulseaudio \
+            libsqlite3-dev \
+            sqlite3 \
+            bzip2 \
+            libbz2-dev \
+            liblzma-dev \
+            tk-dev \
+            libgdbm-dev \
+            libc6-dev \
+            libdb5.3-dev \
+            libreadline-dev \
+            libexpat1-dev \
+            libmpdec-dev \
+            unzip \
+            openjdk-17-jdk \
+            zip \
+            wget \
+            git \
+            autoconf \
+            libtool \
+            gettext
+
+      - name: Install Buildozer
+        run: pip install buildozer cython
+
+      - name: Setup Android SDK cmdline-tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          mkdir -p $ANDROID_HOME/tools/bin
+          cd $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
+          unzip tools.zip
+          rm tools.zip
+          mv cmdline-tools latest
+          # Compatibilità Buildozer/Python-for-Android
+          ln -s $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
 
       - name: Accept licenses
         run: |
