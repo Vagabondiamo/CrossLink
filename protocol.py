@@ -45,26 +45,39 @@ class CrossLinkProtocol:
         threading.Thread(target=self._udp_listener, daemon=True).start()
 
     def _udp_broadcaster(self):
+        # Usiamo un socket specifico per il broadcast
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        # Alcuni sistemi richiedono il bind alla porta di invio per il broadcast
+        # ma spesso è opzionale.
+        
         while self.is_running:
-            message = json.dumps({"type": "discovery", "name": self.device_name, "ip": self.get_local_ip()}).encode()
-            sock.sendto(message, ('<broadcast>', self.UDP_PORT))
+            try:
+                ip = self.get_local_ip()
+                message = json.dumps({"type": "discovery", "name": self.device_name, "ip": ip}).encode()
+                # Invio su tutte le interfacce
+                sock.sendto(message, ('255.255.255.255', self.UDP_PORT))
+            except Exception as e:
+                print(f"Broadcast error: {e}")
             time.sleep(3)
 
     def _udp_listener(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(('0.0.0.0', self.UDP_PORT))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # Su Android/Linux, spesso è necessario bindare all'interfaccia corretta o 0.0.0.0
+        sock.bind(('', self.UDP_PORT)) 
+        
         while self.is_running:
-            data, addr = sock.recvfrom(1024)
             try:
+                data, addr = sock.recvfrom(1024)
                 msg = json.loads(data.decode())
                 if msg["type"] == "discovery" and msg["ip"] != self.get_local_ip():
                     if msg["ip"] not in self.discovered_devices:
                         self.discovered_devices[msg["ip"]] = msg["name"]
                         if self.on_device_discovered:
                             self.on_device_discovered(self.discovered_devices)
-            except:
+            except Exception as e:
+                # print(f"Listener error: {e}")
                 pass
 
     # --- Transfer (TCP) ---
@@ -98,45 +111,11 @@ class CrossLinkProtocol:
                         received += len(chunk)
                         if self.on_transfer_progress:
                             self.on_transfer_progress(filename, received, filesize)
-                
+                client.close()
                 if self.on_file_received:
                     self.on_file_received(filename)
-            elif header["type"] == "text":
-                text = header["content"]
-                # In a real app, we'd copy this to clipboard or show a popup
-                print(f"Received text: {text}")
         except Exception as e:
             print(f"Receive error: {e}")
-        finally:
-            client.close()
-
-    def send_file(self, target_ip, file_path):
-        path = Path(file_path)
-        if not path.exists(): return
-        
-        filesize = path.stat().st_size
-        filename = path.name
-        
-        def _sender():
-            try:
-                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client.connect((target_ip, self.TCP_PORT))
-                
-                header = json.dumps({"type": "file", "filename": filename, "size": filesize}).encode()
-                client.send(header.ljust(1024)) # Pad header to fixed size
-                
-                with open(path, "rb") as f:
-                    sent = 0
-                    while chunk := f.read(self.BUFFER_SIZE):
-                        client.sendall(chunk)
-                        sent += len(chunk)
-                        if self.on_transfer_progress:
-                            self.on_transfer_progress(filename, sent, filesize)
-                client.close()
-            except Exception as e:
-                print(f"Send error: {e}")
-        
-        threading.Thread(target=_sender, daemon=True).start()
-
+            
     def stop(self):
         self.is_running = False
