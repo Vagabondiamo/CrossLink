@@ -1,6 +1,13 @@
 <div align="center">
 
-# 📡 CrossLink
+```
+ ██████╗██████╗  ██████╗ ███████╗███████╗      ██╗     ██╗███╗   ██╗██╗  ██╗
+██╔════╝██╔══██╗██╔═══██╗██╔════╝██╔════╝      ██║     ██║████╗  ██║██║ ██╔╝
+██║     ██████╔╝██║   ██║███████╗███████╗█████╗██║     ██║██╔██╗ ██║█████╔╝ 
+██║     ██╔══██╗██║   ██║╚════██║╚════██║╚════╝██║     ██║██║╚██╗██║██╔═██╗ 
+╚██████╗██║  ██║╚██████╔╝███████║███████║      ███████╗██║██║ ╚████║██║  ██╗
+ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝      ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
+```
 
 **Transfer files between PC and phone in seconds — no app, no cable, no cloud.**
 
@@ -16,12 +23,12 @@ Start the server, scan the QR with your camera, and you're ready to go.
 
 ## How it works
 
-CrossLink starts a lightweight local web server on your PC and prints a **QR code** in the terminal. Anyone on the same Wi-Fi network can scan it with their phone camera and instantly open a web page to:
+CrossLink starts a lightweight local web server on your PC and prints a **QR code** directly in the terminal. Anyone on the same Wi-Fi network can scan it with their phone camera — no app needed — and instantly open a clean web interface to:
 
-- 📤 **Send files to the PC** — upload one or more files from your phone directly to the PC
-- 📥 **Download files from the PC** — browse and download any file in the folder where the server was started
+- 📤 **Send files to the PC** — select one or more files from your phone, watch the real-time progress bar, and they land directly in the folder where you started the server
+- 📥 **Download files from the PC** — browse the list of files in the current folder and download any of them with one tap
 
-> ⚡ Works on Wi-Fi networks **without internet access** (isolated routers, mobile hotspots, etc.)
+> ⚡ Works on Wi-Fi networks **without internet access** — isolated routers, mobile hotspots, and local-only setups all work fine.
 
 ---
 
@@ -37,7 +44,7 @@ segno
 python-multipart
 ```
 
-Install them all with:
+Install them all at once:
 
 ```bash
 pip install fastapi uvicorn segno python-multipart
@@ -48,7 +55,7 @@ pip install fastapi uvicorn segno python-multipart
 ## Installation
 
 ```bash
-git clone https://github.com/vagabondiamo/CrossLink.git
+git clone https://github.com/Vagabondiamo/CrossLink.git
 cd CrossLink
 pip install fastapi uvicorn segno python-multipart
 ```
@@ -69,8 +76,8 @@ pip install fastapi uvicorn segno python-multipart
    Server running at http://192.168.1.10:8000
    ```
 4. Scan the QR code with your phone camera
-5. In the web page that opens, select a file and tap **Upload**
-6. The file will be saved directly in the folder where you started the server
+5. Tap the upload area, select one or more files, and press **Upload**
+6. A progress bar will show the transfer status — files are saved in the folder where you started the server
 
 ---
 
@@ -85,7 +92,7 @@ pip install fastapi uvicorn segno python-multipart
    python server.py
    ```
 3. Scan the QR code with your phone
-4. In the **"Files on PC"** section of the web page, you'll see all available files — tap **Download** on the one you want
+4. In the **"Files on PC"** section, you'll see all files in the current folder — tap **Download** on the one you want
 
 ---
 
@@ -106,9 +113,9 @@ CrossLink/
 
 CrossLink is designed for **local and private use**. The server is accessible to **any device on the same network**, so:
 
-- Do not run it on public networks (cafés, airports, etc.) — use your phone's personal hotspot instead: CrossLink works perfectly on it even without an internet connection, and only your devices will be on the network
-- Avoid running it in your home directory or folders with sensitive data
-- Stop it with `Ctrl+C` when you're done
+- Avoid running it on public networks (cafés, airports, etc.) — use your **phone's personal hotspot** instead: CrossLink works perfectly on it even without an internet connection, and only your devices will be on the network
+- Avoid running it in your home directory or in folders with sensitive data
+- Stop the server with `Ctrl+C` when you're done
 
 ---
 
