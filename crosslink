@@ -1,0 +1,4 @@
+#!/bin/bash
+# Script per avviare CrossLink da qualsiasi cartella
+PROJECT_DIR="/home/zakaria/crosslink_standalone"
+$PROJECT_DIR/venv/bin/python3 $PROJECT_DIR/server.py
