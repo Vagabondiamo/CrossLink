@@ -27,11 +27,13 @@ class CrossLinkProtocol:
         self.on_file_received = None # Callback(filename)
         self.on_device_discovered = None # Callback(devices_dict)
         self.on_transfer_progress = None # Callback(filename, current, total)
+        print(f"DEBUG: CrossLinkProtocol initialized as {self.device_name}")
 
     def get_local_ip(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
-            s.connect(('10.255.255.255', 1))
+            # Connessione a un IP pubblico per determinare l'interfaccia locale
+            s.connect(('8.8.8.8', 80))
             IP = s.getsockname()[0]
         except Exception:
             IP = '127.0.0.1'
@@ -41,43 +43,46 @@ class CrossLinkProtocol:
 
     # --- Discovery (UDP) ---
     def start_discovery(self):
+        print("DEBUG: Starting discovery threads...")
         threading.Thread(target=self._udp_broadcaster, daemon=True).start()
         threading.Thread(target=self._udp_listener, daemon=True).start()
 
     def _udp_broadcaster(self):
-        # Usiamo un socket specifico per il broadcast
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        # Alcuni sistemi richiedono il bind alla porta di invio per il broadcast
-        # ma spesso è opzionale.
         
         while self.is_running:
             try:
                 ip = self.get_local_ip()
                 message = json.dumps({"type": "discovery", "name": self.device_name, "ip": ip}).encode()
-                # Invio su tutte le interfacce
+                
+                # Prova sia il broadcast universale che quello specifico della tua rete WiFi
                 sock.sendto(message, ('255.255.255.255', self.UDP_PORT))
+                sock.sendto(message, ('192.168.170.255', self.UDP_PORT))
+                
             except Exception as e:
-                print(f"Broadcast error: {e}")
+                print(f"DEBUG: Broadcast error: {e}")
             time.sleep(3)
 
     def _udp_listener(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # Su Android/Linux, spesso è necessario bindare all'interfaccia corretta o 0.0.0.0
         sock.bind(('', self.UDP_PORT)) 
+        print("DEBUG: Listening for discovery packets...")
         
         while self.is_running:
             try:
                 data, addr = sock.recvfrom(1024)
                 msg = json.loads(data.decode())
+                # print(f"DEBUG: Received message from {addr}: {msg}")
                 if msg["type"] == "discovery" and msg["ip"] != self.get_local_ip():
                     if msg["ip"] not in self.discovered_devices:
+                        print(f"DEBUG: Discovered new device: {msg['name']} ({msg['ip']})")
                         self.discovered_devices[msg["ip"]] = msg["name"]
                         if self.on_device_discovered:
                             self.on_device_discovered(self.discovered_devices)
             except Exception as e:
-                # print(f"Listener error: {e}")
+                # print(f"DEBUG: Listener error: {e}")
                 pass
 
     # --- Transfer (TCP) ---
@@ -115,7 +120,7 @@ class CrossLinkProtocol:
                 if self.on_file_received:
                     self.on_file_received(filename)
         except Exception as e:
-            print(f"Receive error: {e}")
+            print(f"DEBUG: Receive error: {e}")
             
     def stop(self):
         self.is_running = False
