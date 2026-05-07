@@ -1,31 +1,42 @@
-# CrossLink Standalone
+# CrossLink
 
-Cross-platform file transfer application (PC & Mobile) that works without a web browser.
+CrossLink è un'applicazione leggera per il trasferimento file tra PC e dispositivi mobili (Android) che utilizza una semplice interfaccia web locale, accessibile tramite scansione QR.
 
-## Features
-- **Auto-Discovery:** Devices find each other automatically on the same Wi-Fi.
-- **Native GUI:** Professional interface using PySide6 (PC) and Kivy (Mobile).
-- **Socket Transfer:** High-speed transfers using a custom TCP protocol.
-- **Drag & Drop:** Send files to the first discovered device by dragging them into the PC window.
+## Funzionalità
+- **Server Web Locale**: Condivide istantaneamente la cartella corrente.
+- **Accesso QR**: Scansiona il codice QR per aprire la pagina di upload/download sul telefono.
+- **Upload Progress**: Barra di caricamento in tempo reale nel browser.
+- **Storico**: Tieni traccia dei file ricevuti durante la sessione.
 
-## How to use on PC
-1. Navigate to the project folder:
+## Installazione (PC)
+Assicurati di avere `python3` e `pip` installati.
+
+1. Clona il repository:
    ```bash
-   cd ~/Scrivania/crosslink_standalone
+   git clone https://github.com/Vagabondiamo/CrossLink.git
+   cd CrossLink
    ```
-2. Run the application:
+2. Crea un ambiente virtuale e installa le dipendenze:
    ```bash
-   ./venv/bin/python gui.py
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install fastapi uvicorn qrcode[pil] python-multipart segno
    ```
 
-## How to use on Mobile (Android)
-1. Install **Pydroid 3** or **Termux** from the Play Store.
-2. Copy the `crosslink_standalone` folder to your phone.
-3. Install dependencies (`pip install kivy`).
-4. Run `mobile/main.py`.
+## Come usare
+Per avviare il server di condivisione file nella cartella corrente:
 
-## Directory structure
-- `protocol.py`: Shared communication logic.
-- `gui.py`: Desktop application (PySide6).
-- `mobile/`: Mobile application source (Kivy).
-- `uploads/`: Default folder for received files.
+```bash
+# Se hai installato lo script globale:
+crosslink
+
+# Oppure, se sei nella cartella del progetto:
+./venv/bin/python3 server.py
+```
+
+Il terminale mostrerà un codice QR. Scansionalo con il tuo dispositivo mobile per aprire la dashboard di trasferimento nel browser.
+
+## Sviluppo
+- Il server è basato su **FastAPI**.
+- I file caricati verranno salvati nella cartella in cui avvii il server.
+- Per il download, usa la lista presente nella pagina web.
