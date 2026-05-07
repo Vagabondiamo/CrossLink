@@ -91,6 +91,7 @@ class CrossLinkProtocol:
 
     def _tcp_server(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind(('0.0.0.0', self.TCP_PORT))
         server.listen(5)
         while self.is_running:
