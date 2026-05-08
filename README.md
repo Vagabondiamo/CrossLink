@@ -62,6 +62,26 @@ pip install fastapi uvicorn segno python-multipart
 
 ---
 
+## Quick launch (Linux/macOS)
+
+Instead of running `python server.py` every time, you can use the included `crosslink` script to launch the server from anywhere with a single command:
+
+```bash
+# Make it executable (only once)
+chmod +x crosslink
+
+# Move it to your PATH (only once)
+sudo mv crosslink /usr/local/bin/
+```
+
+From now on, just navigate to any folder and run:
+
+```bash
+crosslink
+```
+
+---
+
 ## Usage
 
 ### Send a file **from phone to PC**
@@ -70,6 +90,10 @@ pip install fastapi uvicorn segno python-multipart
 2. Start the server:
    ```bash
    python server.py
+   ```
+   Or, if you set up the quick launch:
+   ```bash
+   crosslink
    ```
 3. A QR code will appear in the terminal along with a message like:
    ```
@@ -90,6 +114,10 @@ pip install fastapi uvicorn segno python-multipart
 2. Start the server:
    ```bash
    python server.py
+   ```
+   Or with the quick launch:
+   ```bash
+   crosslink
    ```
 3. Scan the QR code with your phone
 4. In the **"Files on PC"** section, you'll see all files in the current folder — tap **Download** on the one you want
