@@ -54,7 +54,20 @@ pip install fastapi uvicorn segno python-multipart
 
 ## Installation
 
+### Linux / macOS
+
 ```bash
+git clone https://github.com/Vagabondiamo/CrossLink.git
+cd CrossLink
+pip install fastapi uvicorn segno python-multipart
+```
+
+### Windows
+
+1. Install [Python](https://www.python.org/downloads/) — make sure to check **"Add Python to PATH"** during installation
+2. Open **Command Prompt** or **PowerShell** and run:
+
+```bat
 git clone https://github.com/Vagabondiamo/CrossLink.git
 cd CrossLink
 pip install fastapi uvicorn segno python-multipart
@@ -62,21 +75,51 @@ pip install fastapi uvicorn segno python-multipart
 
 ---
 
-## Quick launch (Linux/macOS)
+## Quick launch
 
-Instead of running `python server.py` every time, you can use the included `crosslink` script to launch the server from anywhere with a single command:
+Instead of running `python server.py` every time, you can launch CrossLink from anywhere with a single command.
+
+### Linux / macOS
+
+The repo includes a ready-to-use `crosslink` bash script. Set it up once:
 
 ```bash
-# Make it executable (only once)
+# Edit the script and set your CrossLink folder path
+nano crosslink   # change PROJECT_DIR to your actual path
+
+# Make it executable
 chmod +x crosslink
 
-# Move it to your PATH (only once)
+# Move it to your PATH
 sudo mv crosslink /usr/local/bin/
 ```
 
-From now on, just navigate to any folder and run:
+From now on, just navigate to any folder and type:
 
 ```bash
+crosslink
+```
+
+### Windows
+
+Create a `crosslink.bat` file with the following content, replacing the path with your actual CrossLink folder:
+
+```bat
+@echo off
+set PROJECT_DIR=C:\Users\YourName\CrossLink
+python "%PROJECT_DIR%\server.py"
+```
+
+Then add it to your PATH (one-time setup):
+
+1. Move `crosslink.bat` to a folder of your choice (e.g. `C:\Tools\`)
+2. Open **Start** → search **"Environment Variables"** → click **"Edit the system environment variables"**
+3. Under **System Variables**, find **Path** → click **Edit** → **New** → paste `C:\Tools\`
+4. Click OK and restart any open terminal
+
+From now on, open any terminal, navigate to any folder, and type:
+
+```bat
 crosslink
 ```
 
@@ -132,7 +175,8 @@ CrossLink/
 ├── gui.py           # Optional desktop GUI (PySide6)
 ├── protocol.py      # Shared communication logic
 ├── mobile/          # Alternative mobile client (Kivy)
-└── crosslink        # Quick-launch script (Linux/macOS)
+├── crosslink        # Quick-launch script (Linux/macOS)
+└── crosslink.bat    # Quick-launch script (Windows)
 ```
 
 ---
