@@ -50,3 +50,4 @@ $ANDROID_HOME/licenses/mips-android-sysimage-license
       with:
         name: crosslink-apk
         path: mobile/bin/*.apk
+
