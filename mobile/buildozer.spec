@@ -21,4 +21,4 @@ android.minapi = 21
 
 android.accept_sdk_license = True
 
-android.archs = arm64-v8a
+android.archs = armeabi-v7a, arm64-v8a
