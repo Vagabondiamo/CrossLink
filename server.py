@@ -3,8 +3,10 @@ import socket
 import uvicorn
 import signal
 import sys
+import asyncio
 from fastapi import FastAPI, UploadFile, File, Request, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import segno
 from pathlib import Path
 from datetime import datetime
@@ -20,7 +22,6 @@ signal.signal(signal.SIGINT, signal_handler)
 app = FastAPI()
 
 # Configuration
-# Condividiamo la cartella corrente da cui viene lanciato lo script
 UPLOAD_DIR = Path(os.getcwd())
 
 def get_ip_address():
@@ -44,6 +45,8 @@ async def index():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CrossLink - Transfer</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Lucide Icons CDN -->
+        <script src="https://unpkg.com/lucide@latest"></script>
     </head>
     <body class="bg-gradient-to-br from-blue-500 to-indigo-700 min-h-screen flex flex-col items-center p-4 text-white font-sans">
         <h1 class="text-3xl font-bold mt-8 mb-4">CrossLink</h1>
@@ -145,16 +148,41 @@ async def index():
                 xhr.send(formData);
             };
 
+            function getFileIconName(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                const mapping = {
+                    'mp3': 'music', 'wav': 'music', 'flac': 'music', 'm4a': 'music',
+                    'mp4': 'video', 'mkv': 'video', 'avi': 'video', 'mov': 'video',
+                    'jpg': 'image', 'jpeg': 'image', 'png': 'image', 'gif': 'image', 'webp': 'image',
+                    'pdf': 'file-text', 'doc': 'file-text', 'docx': 'file-text', 'xls': 'table', 'xlsx': 'table',
+                    'ppt': 'presentation', 'pptx': 'presentation', 'zip': 'archive', 'rar': 'archive', '7z': 'archive',
+                    'py': 'terminal', 'js': 'file-code', 'html': 'globe', 'css': 'palette', 'json': 'braces',
+                    'exe': 'cpu', 'msi': 'cpu', 'apk': 'smartphone', 'txt': 'file-text', 'md': 'file-text'
+                };
+                return mapping[ext] || 'file';
+            }
+
             async function refreshFiles() {
                 const res = await fetch('/files');
                 const data = await res.json();
                 filesList.innerHTML = '';
-                data.forEach(filename => {
+                data.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'flex justify-between items-center border-b border-white/10 pb-2';
-                    li.innerHTML = `<span>${filename}</span> <a href="/download/${filename}" class="bg-white/20 px-3 py-1 rounded-lg text-xs hover:bg-white/30">Download</a>`;
+                    const iconName = getFileIconName(item.name);
+                    
+                    li.innerHTML = `
+                        <div class="flex items-center">
+                            <i data-lucide="${iconName}" class="w-5 h-5 mr-3 text-white/80"></i>
+                            <span class="truncate max-w-[150px] md:max-w-xs font-medium text-sm text-white/90">${item.name}</span>
+                        </div>
+                        <a href="/download/${item.name}" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors" title="Download">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </a>
+                    `;
                     filesList.appendChild(li);
                 });
+                lucide.createIcons();
             }
             refreshFiles();
         </script>
@@ -178,21 +206,35 @@ async def upload_files(request: Request):
 
 @app.get("/files")
 async def list_files():
-    file_list = []
+    items = []
     try:
         for item in UPLOAD_DIR.iterdir():
+            if item.name.startswith('.'): continue
             if item.is_file():
-                file_list.append(item.name)
+                items.append({
+                    "name": item.name,
+                    "is_dir": False
+                })
     except Exception as e:
         print(f"DEBUG: List files error: {e}")
-    return file_list
+    return items
 
 @app.get("/download/{filename:path}")
 async def download_file(filename: str):
     file_path = UPLOAD_DIR / filename
-    if not file_path.exists():
+    if not file_path.exists() or file_path.is_dir():
         raise HTTPException(status_code=404, detail="File non trovato")
-    return FileResponse(file_path, filename=os.path.basename(filename))
+    
+    # Richiesta conferma nel terminale
+    print(f"\n[!] RICHIESTA DOWNLOAD: Il telefono vuole scaricare '{filename}'")
+    confirm = input(f"    Permettere il download? (s/n): ").lower()
+    
+    if confirm == 's':
+        print(f"[+] Download autorizzato per '{filename}'")
+        return FileResponse(file_path, filename=os.path.basename(filename))
+    else:
+        print(f"[-] Download negato per '{filename}'")
+        raise HTTPException(status_code=403, detail="Download negato dall'utente sul PC")
 
 if __name__ == "__main__":
     ip = get_ip_address()

@@ -128,27 +128,36 @@ class MainScreen(Screen):
             self.files_layout.add_widget(Label(text="Nessun file", size_hint_y=None, height=40))
             return
         
-        for filename in files:
+        for item in files:
+            name = item["name"]
+            is_dir = item["is_dir"]
+            icon = "📁" if is_dir else "📄"
+            
             file_btn = Button(
-                text=f"📄 {filename}",
+                text=f"{icon} {name}",
                 size_hint_y=None,
                 height=50,
-                on_press=lambda x, fn=filename: self.download_file(fn)
+                on_press=lambda x, n=name, d=is_dir: self.download_file(n, d)
             )
             self.files_layout.add_widget(file_btn)
     
-    def download_file(self, filename):
+    def download_file(self, filename, is_dir=False):
         try:
             response = requests.get(f"{self.server_url}/download/{filename}")
             if response.status_code == 200:
                 # Salva nella cartella Downloads
                 from android.storage import primary_external_storage_path
-                download_path = os.path.join(primary_external_storage_path(), "Download", filename)
+                
+                local_filename = filename
+                if is_dir and not filename.lower().endswith(".zip"):
+                    local_filename += ".zip"
+                    
+                download_path = os.path.join(primary_external_storage_path(), "Download", local_filename)
                 
                 with open(download_path, 'wb') as f:
                     f.write(response.content)
                 
-                self.show_message(f"Scaricato: {filename}")
+                self.show_message(f"Scaricato: {local_filename}")
             else:
                 self.show_message("Errore download")
         except Exception as e:
